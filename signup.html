@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Signup Page</title>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        background: linear-gradient( to right, #89a9dd, #4f8ced, #1879e1);            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .signup-container {
+            display: flex;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .signup-form {
+            flex: 1;
+            padding: 20px;
+        }
+
+          .signup-form h2{
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .signup-form p {
+            font-size: 1rem;
+            color: #302e2e;
+        }
+
+        .signup-form input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .signup-form button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .signup-form button:hover {
+            background: #0056b3;
+        }
+
+        .google-signup {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background: white;
+            color: #252424;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .google-signup:hover {
+            background: #056bd9;
+        }
+
+        .google-signup img {
+            margin-right: 10px;
+          width: 20px;
+          height: 20px;
+        }
+
+        .illustration {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .illustration img {
+            max-width: 100%;
+            height: 400px;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .signup-container {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .illustration {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+          <div class="illustration">
+            <img src="img/construction.png" alt="Illustration">
+        </div>
+        <div class="signup-form">
+            <h2>Sign Up</h2>
+            <p>Create an account to get started.</p>
+            <input type="text" placeholder="Full Name">
+            <input type="email" placeholder="Email">
+            <input type="password" placeholder="Password">
+            <button>Sign Up</button>
+            <button class="google-signup" style="background-color:#f3f0f0 ; color: black;"><img src="img/img_5.png"> Sign up with Google</button>
+                    <br> <p style="text-align: center">Already have an account? <a style="color: #007bff; " href ="login.html">Login</a></p>
+
+        </div>
+
+    </div>
+</body>
+</html>

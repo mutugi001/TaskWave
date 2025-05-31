@@ -1,0 +1,8 @@
+/vendor
+.env.*
+.vscode
+*.log
+.gitignore
+/public/storage
+
+
