@@ -33,17 +33,73 @@ import { useAuth } from '@/contexts/AuthContext'; // Import useAuth
 
 // --- Task Component Placeholder ---
 // TODO: Replace with your actual TaskComponent import and implementation
-const TaskComponent: React.FC<{ task: Task, onStatusChange: (newStatus: Task['status']) => void }> = ({ task, onStatusChange }) => (
-  <div className="p-2 border rounded mb-2 bg-muted/40">
-    <p className="font-semibold">{task.title}</p>
-    <p className="text-sm text-muted-foreground">{task.description || 'No description'}</p>
-    <p className="text-xs mt-1">Status: {task.status}</p>
-    {/* Example: Button to mark as completed */}
-    <Button size="sm" variant="outline" className="mt-1" onClick={() => onStatusChange('completed')} disabled={task.status === 'completed'}>
-      Mark Completed
-    </Button>
-  </div>
-);
+const TaskComponent: React.FC<{ task: Task, onStatusChange: (newStatus: Task['status']) => void }> = ({ task }) => {
+  const { deleteTask, markTaskAsCompleted, fetchTasksForProject } = useTasks();
+  const { toast } = useToast();
+
+  const handleDelete = async (taskId: number) => {
+    try {
+      const success = await deleteTask(task.project_id, taskId);
+      if (success) {
+        toast({ title: "Task Deleted", description: "Task deleted successfully." });
+        // Optionally refresh tasks for the project after deletion
+        if (task.project_id) {
+          fetchTasksForProject(task.project_id);
+        }
+      } else {
+        toast({ title: "Error", description: "Failed to delete task.", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "An unexpected error occurred while deleting task.", variant: "destructive" });
+    }
+  };
+
+  const handleMarkCompleted = async (taskId: number) => {
+    try {
+      const updatedTask = await markTaskAsCompleted(taskId);
+      if (updatedTask) {
+        toast({ title: "Success", description: "Task marked as completed!" });
+        // Fetch tasks for the project to get updated info
+        if (task.project_id) {
+          fetchTasksForProject(task.project_id);
+        }
+      } else {
+        toast({ title: "Error", description: "Failed to mark task as completed.", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "An unexpected error occurred while marking task as completed.", variant: "destructive" });
+    }
+  };
+
+  return (
+    <div className="p-2 border rounded mb-2 bg-muted/40 flex justify-between items-start gap-2">
+      <div>
+        <p className="font-semibold">{task.title}</p>
+        <p className="text-sm text-muted-foreground">{task.description || 'No description'}</p>
+        <p className="text-xs mt-1">Status: {task.status}</p>
+        {/* Example: Button to mark as completed */}
+        <Button
+          size="sm"
+          variant="outline"
+          className="mt-1"
+          onClick={() => handleMarkCompleted(task.id)}
+          disabled={task.status === 'completed'}
+        >
+          Mark Completed
+        </Button>
+      </div>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="text-red-500 hover:text-red-700"
+        title="Delete Task"
+        onClick={() => handleDelete(task.id)}
+      >
+        <Trash2 className="w-4 h-4" />
+      </Button>
+    </div>
+  );
+};
 // -----------------------------
 
 const statusColors: { [key: string]: string } = {
@@ -119,7 +175,15 @@ export default function Projects() {
   const [newProject, setNewProject] = useState<NewProjectFormState>(initialNewProjectState);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
-  const [newTask, setNewTask] = useState<Omit<Task, "project_id" | "id">>({ title: "", due_date:"", priority: "low", assigned_team: "", description: "", status: "not_started" });  // --------------------
+  const [newTask, setNewTask] = useState<Omit<Task, "project_id" | "id"> & { dependencies?: number[] | null }>({
+    title: "",
+    due_date: "",
+    priority: "low",
+    assigned_team: "",
+    description: "",
+    status: "not_started",
+    dependencies: null,
+  });  // --------------------
   const [isEditingProject, setIsEditingProject] = useState(false);
   const [editingProject, setEditingProject] = useState<NewProjectFormState | null>(null);
 
@@ -153,11 +217,14 @@ export default function Projects() {
       return;
     }
     try {
-      const createdTask = await addTaskToProject(selectedProject, newTask);
+      const dependenciesToSend = Array.isArray(newTask.dependencies) && newTask.dependencies.length > 0 ? newTask.dependencies : null;
+      const createdTask = await addTaskToProject(selectedProject, { ...newTask, dependencies: dependenciesToSend });
       if (createdTask) {
         toast({ title: "Success", description: "Task added successfully!" });
         setIsAddingTask(false);
-        setNewTask({ title: "", description: "", status: "not_started", assigned_team: "", due_date: "", priority: "low" });
+        setNewTask({ title: "", description: "", status: "not_started", assigned_team: "", due_date: "", priority: "low", dependencies: null });
+        // Fetch tasks for the project to get updated info
+        fetchTasksForProject(selectedProject);
       } else {
         toast({ title: "Error", description: `Failed to add task: ${tasksError || 'Unknown error'}`, variant: "destructive" });
       }
@@ -388,15 +455,12 @@ export default function Projects() {
                         </Button>
                       </div>
                     </div>
-
                     {/* --- Expanded Task Area --- */}
                     {isExpanded && (
                       <div className="mt-2 space-y-3 pt-3 min-h-[50px]">
-
                         {tasksLoading && expandedProject === project.id && <p className="text-sm text-muted-foreground italic">Loading tasks...</p>}
                         {!tasksLoading && tasksError && expandedProject === project.id && <p className="text-sm text-red-600 italic">Error loading tasks: {tasksError}</p>}
                         {!tasksLoading && !tasksError && (
-
                           currentProjectTasks.length > 0 ? (
                             currentProjectTasks.map(task => (
                               <TaskComponent
@@ -485,18 +549,135 @@ export default function Projects() {
                 <Label htmlFor="task-description">Description</Label>
                 <Input id="task-description" value={newTask.description} onChange={(e) => setNewTask({ ...newTask, description: e.target.value })} />
               </div>
+              {/* --- Dependencies Multi-Select Dropdown --- */}
               <div className="space-y-2">
-                <Label htmlFor="task-status">Status</Label>
-                <Select value={newTask.status} onValueChange={(value: Task['status']) => setNewTask({ ...newTask, status: value })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Label htmlFor="task-dependencies">Dependencies</Label>
+                <Select
+                  open={undefined}
+                  value=""
+                  onValueChange={() => {}}
+                  // Dummy handlers to satisfy Select API, actual logic below
+                >
+                  <SelectTrigger>
+                    <span>
+                      {selectedProject &&
+                      tasksByProject[selectedProject] &&
+                      Array.isArray(newTask.dependencies) &&
+                      newTask.dependencies.length > 0
+                        ? tasksByProject[selectedProject]
+                            .filter(task => newTask.dependencies?.includes(task.id))
+                            .map(task => task.title)
+                            .join(", ")
+                        : "Select dependencies"}
+                    </span>
+                  </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="not_started">Not Started</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="review">Review</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                    {/* Option for None */}
+                    <div
+                      key="none"
+                      className="flex items-center px-2 py-1 cursor-pointer hover:bg-muted rounded"
+                      onClick={e => {
+                        e.preventDefault();
+                        setNewTask({ ...newTask, dependencies: null });
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={!Array.isArray(newTask.dependencies) || newTask.dependencies.length === 0}
+                        readOnly
+                        className="mr-2"
+                      />
+                      <span>None</span>
+                    </div>
+                    {selectedProject &&
+                    tasksByProject[selectedProject] &&
+                    tasksByProject[selectedProject].length > 0 ? (
+                      tasksByProject[selectedProject].map((task, idx) => (
+                        <div
+                          key={task.id ?? idx}
+                          className="flex items-center px-2 py-1 cursor-pointer hover:bg-muted rounded"
+                          onClick={e => {
+                            e.preventDefault();
+                            const deps = Array.isArray(newTask.dependencies) ? newTask.dependencies : [];
+                            if (deps.includes(task.id)) {
+                              const updated = deps.filter(id => id !== task.id);
+                              setNewTask({ ...newTask, dependencies: updated.length > 0 ? updated : null });
+                            } else {
+                              setNewTask({ ...newTask, dependencies: [...deps, task.id] });
+                            }
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={!!(Array.isArray(newTask.dependencies) && newTask.dependencies.includes(task.id))}
+                            readOnly
+                            className="mr-2"
+                          />
+                          <span>{task.title}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-2 py-1 text-muted-foreground text-sm">
+                        {selectedProject ? "No tasks available" : "Select a project first"}
+                      </div>
+                    )}
                   </SelectContent>
                 </Select>
+                <span className="text-xs text-muted-foreground">Select tasks this task depends on (optional)</span>
+              </div>
+              {/* --- Status Dropdown with Dependency Logic --- */}
+              <div className="space-y-2">
+                <Label htmlFor="task-status">Status</Label>
+                {(() => {
+                  // Check if any dependency is not completed
+                  let hasIncompleteDependency = false;
+                  if (
+                    selectedProject &&
+                    tasksByProject[selectedProject] &&
+                    Array.isArray(newTask.dependencies) &&
+                    newTask.dependencies.length > 0
+                  ) {
+                    const depTasks = tasksByProject[selectedProject].filter(task =>
+                      newTask.dependencies?.includes(task.id)
+                    );
+                    hasIncompleteDependency = depTasks.some(task => task.status !== "completed");
+                  }
+                  // If any dependency is not completed, force status to not_started and lock dropdown
+                  if (hasIncompleteDependency && newTask.status !== "not_started") {
+                    setTimeout(() => setNewTask(nt => ({ ...nt, status: "not_started" })), 0);
+                  }
+                  return (
+                    <Select
+                      value={newTask.status}
+                      onValueChange={(value: Task['status']) => {
+                        if (!hasIncompleteDependency) setNewTask({ ...newTask, status: value });
+                      }}
+                      disabled={hasIncompleteDependency}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="not_started">Not Started</SelectItem>
+                        <SelectItem value="in_progress" disabled={hasIncompleteDependency}>In Progress</SelectItem>
+                        <SelectItem value="review" disabled={hasIncompleteDependency}>Review</SelectItem>
+                        <SelectItem value="completed" disabled={hasIncompleteDependency}>Completed</SelectItem>
+                        <SelectItem value="cancelled" disabled={hasIncompleteDependency}>Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  );
+                })()}
+                {selectedProject && Array.isArray(newTask.dependencies) && newTask.dependencies.length > 0 && (() => {
+                  const depTasks = tasksByProject[selectedProject]?.filter(task =>
+                    newTask.dependencies?.includes(task.id)
+                  ) || [];
+                  const incomplete = depTasks.filter(task => task.status !== "completed");
+                  return incomplete.length > 0 ? (
+                    <span className="text-xs text-red-500">
+                      All dependencies must be completed before changing status.
+                    </span>
+                  ) : null;
+                })()}
               </div>
               <Button onClick={handleAddTask} className="mt-4">Create Task</Button>
             </div>

@@ -17,7 +17,6 @@ class Task extends Model
         'assigned_team',
         'status',
         'due_date',
-        'dependent_task_id',
     ];
 
     public function project()
@@ -25,14 +24,27 @@ class Task extends Model
         return $this->belongsTo(Project::class);
     }
 
-    public function dependentTasks()
+    // Tasks this task depends on
+    public function dependencies()
     {
-        return $this->hasMany(Task::class, 'dependent_task_id');
+        // tasks_id is the local key, dependent_task_id is the related key
+        return $this->belongsToMany(
+            Task::class,
+            'task_dependencies',
+            'tasks_id',
+            'dependent_task_id'
+        );
     }
 
-    public function dependentTask()
+    public function dependents()
     {
-        return $this->belongsTo(Task::class, 'dependent_task_id');
+        // dependent_task_id is the local key, tasks_id is the related key
+        return $this->belongsToMany(
+            Task::class,
+            'task_dependencies',
+            'dependent_task_id',
+            'tasks_id'
+        );
     }
 
     public function team()

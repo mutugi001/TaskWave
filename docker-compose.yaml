@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: collinsmutugi/taskwave-frontend:v2.0
+    image: collinsmutugi/taskwave-frontend:v2.2
     container_name: frontend_app
     restart: unless-stopped
     depends_on:
@@ -13,7 +13,7 @@ services:
       - REACT_APP_BACKEND_URL="http://localhost:8000"  # Set environment variables if needed
 
   backend:
-    image: collinsmutugi/taskwave-backend:v2.0
+    image: collinsmutugi/taskwave-backend:v2.4
     container_name: backend_app
     restart: unless-stopped
     depends_on:
@@ -52,21 +52,21 @@ services:
       - FILESYSTEM_DISK=local
       - QUEUE_CONNECTION=database
       - CACHE_STORE=database
-      - MAIL_MAILER=log
+      - MAIL_MAILER=smtp
       - MAIL_SCHEME=null
-      - MAIL_HOST=127.0.0.1
-      - MAIL_PORT=2525
-      - MAIL_USERNAME=null
-      - MAIL_PASSWORD=null
-      - MAIL_FROM_ADDRESS="hello@example.com"
-      - MAIL_FROM_NAME="${APP_NAME}"
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USERNAME=taskwaveinfo@gmail.com
+      - MAIL_PASSWORD=qmmiaepgsmogepwq
+      - MAIL_FROM_ADDRESS="taskwaveinfo@gmail.com"
+      - MAIL_FROM_NAME="TaskWave"
       - VITE_APP_NAME="${APP_NAME}"
       - FRONTEND_URL=http://localhost:8080
     volumes:
       - backend_data:/app/storage
 
   db:
-    image: collinsmutugi/taskwave-db:v2.0
+    image: collinsmutugi/taskwave-db:v2.1
     container_name: db_container
     restart: unless-stopped
     environment:

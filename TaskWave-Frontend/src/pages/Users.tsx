@@ -28,11 +28,24 @@ export default function Users() {
   const [isAddingUser, setIsAddingUser] = useState(false);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [filterByRole, setFilterByRole] = useState<'Team Lead' | 'Member' | 'all'>('all');
-  // const [teams] = useState([]); // State to store available teams
+  const countryCodes = [
+    { code: "+1", label: "USA/Canada (+1)" },
+    { code: "+44", label: "UK (+44)" },
+    { code: "+254", label: "Kenya (+254)" },
+    { code: "+91", label: "India (+91)" },
+    { code: "+61", label: "Australia (+61)" },
+    { code: "+27", label: "South Africa (+27)" },
+    { code: "+81", label: "Japan (+81)" },
+    { code: "+49", label: "Germany (+49)" },
+    { code: "+234", label: "Nigeria (+234)" },
+    { code: "+86", label: "China (+86)" },
+    // ...add more as needed
+  ];
   const [newUser, setNewUser] = useState<{
     name: string;
     email: string;
     phone: string;
+    country_code: string;
     profile_picture?: File;
     role: "Team Lead" | "Member";
     team_ids: string[];
@@ -40,6 +53,7 @@ export default function Users() {
     name: "",
     email: "",
     phone: "",
+    country_code: "+254",
     role: "Member",
     team_ids: [],
   });
@@ -49,9 +63,11 @@ export default function Users() {
     name: string;
     email: string;
     phone: string;
+    country_code?: string;
     profile_picture?: File;
     role: "Team Lead" | "Member";
     teams: [];
+    team_ids?: string[];
   } | null>(null);
 
   useEffect(() => {
@@ -82,14 +98,19 @@ export default function Users() {
       toast.error("Please fill in all required fields and select at least one team");
       return;
     }
-
+    // Combine country code and phone for backend
+    const userToSend = {
+      ...newUser,
+      phone: `${newUser.country_code}${newUser.phone.replace(/^0+/, "")}`,
+    };
     try {
-      await addMember(newUser);
+      await addMember(userToSend);
       setIsAddingUser(false);
       setNewUser({
         name: "",
         email: "",
         phone: "",
+        country_code: "+254",
         profile_picture: undefined,
         role: "Member",
         team_ids: [],
@@ -126,27 +147,43 @@ export default function Users() {
   const handleEditUser = (userId: number) => {
     const user = members[userId];
     if (user) {
+      // Try to extract country code from phone
+      let code = "+254";
+      let phone = user.phone || "";
+      for (const c of countryCodes) {
+        if (phone.startsWith(c.code)) {
+          code = c.code;
+          phone = phone.replace(c.code, "");
+          break;
+        }
+      }
       setEditingUser({
         id: user.id,
         name: user.name,
         email: user.email,
-        phone: user.phone,
+        phone: phone,
+        country_code: code,
         profile_picture: undefined,
         role: user.role,
         teams: user.teams,
+        team_ids: user.team_ids || [],
       });
       setIsEditingUser(true);
     }
   };
 
   const handleUpdateUser = async () => {
-    if (!editingUser || !editingUser.name || !editingUser.email || !editingUser.phone || editingUser.team_ids.length === 0) {
+    if (!editingUser || !editingUser.name || !editingUser.email || !editingUser.phone || (editingUser.team_ids && editingUser.team_ids.length === 0)) {
       toast.error("Please fill in all required fields and select at least one team");
       return;
     }
-
+    // Combine country code and phone for backend
+    const userToSend = {
+      ...editingUser,
+      phone: `${editingUser.country_code || "+254"}${editingUser.phone.replace(/^0+/, "")}`,
+    };
     try {
-      await updateMember(editingUser.id, editingUser);
+      await updateMember(editingUser.id, userToSend);
       setIsEditingUser(false);
       setEditingUser(null);
       toast.success("User updated successfully!");
@@ -181,7 +218,7 @@ export default function Users() {
                   Create a new user by filling in their details
                 </SheetDescription>
               </SheetHeader>
-              <div className="grid gap-4 py-4">
+              <div className="grid gap-4 py-4 overflow-y-auto max-h-[calc(100vh-10rem)]">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <Input
@@ -207,14 +244,32 @@ export default function Users() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    placeholder="Enter phone number"
-                    value={newUser.phone}
-                    onChange={(e) =>
-                      setNewUser({ ...newUser, phone: e.target.value })
-                    }
-                  />
+                  <div className="flex gap-2">
+                    <Select
+                      value={newUser.country_code}
+                      onValueChange={(value) => setNewUser({ ...newUser, country_code: value })}
+                    >
+                      <SelectTrigger className="w-36">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {countryCodes.map((c) => (
+                          <SelectItem key={c.code} value={c.code}>
+                            {c.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      id="phone"
+                      placeholder="Enter phone number"
+                      value={newUser.phone}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, phone: e.target.value })
+                      }
+                      className="flex-1"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="teams">Teams</Label>
@@ -310,9 +365,19 @@ export default function Users() {
               >
                 <UserCog className="w-4 h-4" />
               </Button>
-              <Avatar className="w-24 h-24 mx-auto"> {/* Increased size by 20% */}
+              <Avatar className="w-24 h-24 mx-auto">
                 {user.profile_picture ? (
-                  <AvatarImage src={user.profile_picture} alt={`${user.name}'s profile picture`} />
+                  <AvatarImage
+                    src={
+                      // Try to handle both absolute URLs and Laravel's url('storage/...') output
+                      user.profile_picture.startsWith("http")
+                        ? user.profile_picture
+                        : user.profile_picture.startsWith("/storage/")
+                          ? user.profile_picture
+                          : `/storage/${user.profile_picture.replace(/^profile_pictures\//, "")}`
+                    }
+                    alt={`${user.name}'s profile picture`}
+                  />
                 ) : (
                   <AvatarFallback>
                     {user.name.split(" ").map((n) => n[0]).join("")}
@@ -327,14 +392,37 @@ export default function Users() {
                 <div className="space-y-2">
                   <p className="text-sm text-gray-500">Teams</p>
                   <div className="flex flex-wrap gap-2">
-                    {user.teams?.map((teamId) => {
-                      const team = teams[teamId];
-                      return team ? (
-                        <Badge key={teamId} className="bg-blue-100 text-blue-600">
-                          {team.team_name}
-                        </Badge>
-                      ) : null;
-                    })}
+                    {/* Check for user.teams as array of objects or ids */}
+                    {Array.isArray(user.teams) && user.teams.length > 0
+                      ? user.teams.map((team: any) => {
+                          // If team is an object with team_name, use it directly
+                          if (typeof team === "object" && team.team_name) {
+                            return (
+                              <Badge key={team.id || team.team_id} className="bg-blue-100 text-blue-600">
+                                {team.team_name}
+                              </Badge>
+                            );
+                          }
+                          // If team is an id, look up in teams context
+                          const t = teams[team];
+                          return t ? (
+                            <Badge key={team} className="bg-blue-100 text-blue-600">
+                              {t.team_name}
+                            </Badge>
+                          ) : null;
+                        })
+                      : // Fallback: check for user.team_ids
+                        Array.isArray(user.team_ids) && user.team_ids.length > 0
+                        ? user.team_ids.map((teamId: string) => {
+                            const t = teams[teamId];
+                            return t ? (
+                              <Badge key={teamId} className="bg-blue-100 text-blue-600">
+                                {t.team_name}
+                              </Badge>
+                            ) : null;
+                          })
+                        : <span className="text-xs text-gray-400">No teams</span>
+                    }
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -374,107 +462,7 @@ export default function Users() {
           </Card>
         ))}
       </div>
-
-      <Sheet open={isEditingUser} onOpenChange={setIsEditingUser}>
-        <SheetTrigger asChild>
-          {/* Trigger is not needed here */}
-        </SheetTrigger>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>Edit User</SheetTitle>
-            <SheetDescription>
-              Update user details below
-            </SheetDescription>
-          </SheetHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">Full Name</Label>
-              <Input
-                id="edit-name"
-                placeholder="Enter full name"
-                value={editingUser?.name || ""}
-                onChange={(e) =>
-                  setEditingUser((prev) => prev ? { ...prev, name: e.target.value } : null)
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-email">Email</Label>
-              <Input
-                id="edit-email"
-                type="email"
-                placeholder="Enter email address"
-                value={editingUser?.email || ""}
-                onChange={(e) =>
-                  setEditingUser((prev) => prev ? { ...prev, email: e.target.value } : null)
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-phone">Phone Number</Label>
-              <Input
-                id="edit-phone"
-                placeholder="Enter phone number"
-                value={editingUser?.phone || ""}
-                onChange={(e) =>
-                  setEditingUser((prev) => prev ? { ...prev, phone: e.target.value } : null)
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-teams">Teams</Label>
-              <div className="space-y-2">
-                {Object.values(teams).map((team) => (
-                  <div key={team.id} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={`edit-team-${team.id}`}
-                      value={team.id.toString()}
-                      checked={editingUser?.team_ids?.includes(team.id.toString()) || false}
-                      onChange={(e) => {
-                        const teamId = e.target.value;
-                        setEditingUser((prev) => prev ? {
-                          ...prev,
-                          team_ids: e.target.checked
-                            ? [...(prev.team_ids || []), teamId.toString()]
-                            : (prev.team_ids || []).filter((id) => id !== teamId.toString()),
-                        } : null);
-                      }}
-                    />
-                    <label htmlFor={`edit-team-${team.id}`} className="cursor-pointer">
-                      {team.team_name}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-profile_picture">Profile Picture</Label>
-              <Input
-                id="edit-profile_picture"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setEditingUser((prev) => prev ? { ...prev, profile_picture: file } : null);
-                  }
-                }}
-              />
-              {editingUser?.profile_picture && (
-                <img
-                  src={editingUser.profile_picture ? URL.createObjectURL(editingUser.profile_picture) : undefined}
-                  alt="Profile Preview"
-                  className="w-20 h-20 rounded-full mt-2"
-                />
-              )}
-            </div>
-            <Button onClick={handleUpdateUser} className="mt-4">
-              Update User
-            </Button>
+            {/* ...existing code... */}
           </div>
-        </SheetContent>
-      </Sheet>
-    </div>
-  );
-}
+        );
+      }

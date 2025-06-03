@@ -23,19 +23,31 @@ import { ProjectsProvider } from "./contexts/ProjectContext"; // <-- Import Proj
 import { TasksProvider } from '@/contexts/TaskContext'; // <-- 1. Import TasksProvider
 import { TeamsProvider } from "@/contexts/TeamContext"; // Import TeamsProvider
 import { MembersProvider } from "./contexts/MemberContext";
-import { useEffect, useState, useCallback } from "react"; // Import useState
+import { useEffect, useState } from "react"; // Import useState
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [loading, setLoading] = useState(true);
+  // --- Auth state initialization/loading ---
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    setLoading(false);
+    // Efficiently check for auth state in localStorage/sessionStorage
+    // Example: check for a token or user object
+    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    const user = localStorage.getItem("authUser") || sessionStorage.getItem("authUser");
+    // Optionally, you can dispatch/init context here if needed
+    // If your AuthProvider does this automatically, just wait a tick
+    setAuthChecked(true);
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>; // Or a spinner
+  if (!authChecked) {
+    // Show loading screen while checking auth state
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <span className="text-lg font-semibold">Loading...</span>
+      </div>
+    );
   }
 
   return (

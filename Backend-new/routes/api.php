@@ -23,7 +23,6 @@ Route::get('/whatsapp',function (Request $request) {
     if (!$whatsappDetails) {
         return response()->json(['message' => 'WhatsApp details not found'], 404);
     }
-
     $message = 'test message';
     $to = '+254798718682'; // Assuming 'to' is the recipient's phone number
     $phoneNumberId = $whatsappDetails->number; // Assuming 'number' is the phone number ID
@@ -33,7 +32,7 @@ Route::get('/whatsapp',function (Request $request) {
     // dd($whatsappService);
     $response = $whatsappService->sendMessage($to, $message, $phoneNumberId, $token// Assuming you have a way to get the access token
                 );
-    return response()->json($response);
+    return response()->json($response->json());
 })->middleware('auth:sanctum');
 
 Route::post('/register', RegistrationController::class);

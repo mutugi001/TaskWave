@@ -67,8 +67,7 @@ class MemberController extends Controller
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');
             $imagePath = $file->store('profile_pictures', 'public'); // Store in 'storage/app/public/profile_pictures'
-
-            // Save the full URL
+            // Save the correct URL for frontend access
             $validatedData['profile_picture'] = url('storage/' . $imagePath);
         }
 

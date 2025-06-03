@@ -68,6 +68,8 @@ class ProjectController extends Controller
     public function destroy($id){
         // Delete the project
         $project = Project::findOrFail($id);
+        //delete all tasks associated with the project
+        $project->task()->delete();
         $project->delete();
 
         return response()->json(null, 204);

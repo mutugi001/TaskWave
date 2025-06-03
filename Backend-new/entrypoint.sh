@@ -6,4 +6,9 @@ until php artisan migrate --force; do
   sleep 2
 done
 
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+
 exec php artisan serve --host=0.0.0.0 --port=8000

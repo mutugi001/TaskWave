@@ -19,8 +19,15 @@ return new class extends Migration
             $table->string('status')->nullable();
             $table->date('due_date');
             $table->string('assigned_team')->nullable();
-            $table->foreignUlid('dependent_task_id')->nullable()->constrained('tasks');
             $table->timestamps();
+        });
+
+        Schema::create('task_dependencies', function (Blueprint $table) {
+            $table->ulid('tasks_id');
+            $table->ulid('dependent_task_id');
+            $table->foreign('tasks_id')->references('id')->on('tasks')->onDelete('cascade');
+            $table->foreign('dependent_task_id')->references('id')->on('tasks')->onDelete('cascade');
+            $table->primary(['tasks_id', 'dependent_task_id']);
         });
     }
 

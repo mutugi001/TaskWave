@@ -117,7 +117,7 @@ const createTaskForProject = async (projectId: number, payload: NewTaskPayload):
         const response = await apiClient.post<Task>('/api/tasks/store', payload, {
             headers: { 'X-XSRF-TOKEN': xsrfToken || '' }, // Add if CSRF needed here
         });
-        console.log(`Task created for project ${projectId}:`, response.data);
+        console.log(`Task created for project :`, response.data);
         return response.data; // Return the created task data
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
@@ -178,12 +178,12 @@ const updateTask = async (taskId: number, payload: UpdateTaskPayload): Promise<T
  */
 const deleteTask = async (taskId: number): Promise<void> => {
     // Interceptor adds Bearer token
-    // const xsrfToken = Cookies.get('XSRF-TOKEN');
+    const xsrfToken = Cookies.get('XSRF-TOKEN');
     try {
         // Expecting 204 No Content on successful delete
-        await apiClient.delete(`/api/tasks/${taskId}` /*, {
+        await apiClient.delete(`/api/tasks/${taskId}/destroy` , {
             headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
-        }*/);
+        });
         console.log('Task deleted:', taskId);
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
