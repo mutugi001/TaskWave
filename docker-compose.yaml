@@ -13,7 +13,7 @@ services:
       - REACT_APP_BACKEND_URL="http://localhost:8000"  # Set environment variables if needed
 
   backend:
-    image: collinsmutugi/taskwave-backend:v2.4
+    image: collinsmutugi/taskwave-backend:v2.5
     container_name: backend_app
     restart: unless-stopped
     depends_on:

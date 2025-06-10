@@ -17,9 +17,9 @@ return [
 
     'paths' => ['*','sanctum/csrf-cookie','api/*','api/login','api/logout','api/register','api/forgot-password','api/reset-password'],
 
-    'allowed_methods' => ['POST', 'GET', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
+    'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['http://localhost:5173','https://taskwave.jhubafrica.com'],
 
     'allowed_origins_patterns' => [],
 

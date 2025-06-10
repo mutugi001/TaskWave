@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios'; // Import AxiosInstance type
 
 // Get backend URL from environment variables
-const API_BASE_URL: string = import.meta.env.REACT_APP_BACKEND_URL;
+const API_BASE_URL: string = import.meta.env.VITE_BACKEND_URL
 
 // Explicitly type the apiClient instance
 const apiClient: AxiosInstance = axios.create({
