@@ -6,12 +6,17 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\StripePaymentController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\WhatsappController;
 use App\Models\Whatsapp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Stripe\Stripe;
+use Stripe\Checkout\Session;
+
+
 
 
 Route::get('/user', function (Request $request) {
@@ -88,4 +93,8 @@ Route::middleware([
         Route::delete('/{id}/destroy', 'destroy')->name('whatsapp.destroy');
     });
 
+Route::prefix('payment')->controller(StripePaymentController::class)->group(function() {
+    Route::get('/payment',  'show')->name('stripe.show');
+    Route::post('/create-checkout-session', 'createCheckoutSession')->name('stripe.createCheckoutSession');
+});
 });

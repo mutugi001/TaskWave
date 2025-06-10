@@ -23,6 +23,7 @@ import { ProjectsProvider } from "./contexts/ProjectContext"; // <-- Import Proj
 import { TasksProvider } from '@/contexts/TaskContext'; // <-- 1. Import TasksProvider
 import { TeamsProvider } from "@/contexts/TeamContext"; // Import TeamsProvider
 import { MembersProvider } from "./contexts/MemberContext";
+import { PaymentProvider } from './contexts/PaymentContext';
 import { useEffect, useState } from "react"; // Import useState
 
 const queryClient = new QueryClient();
@@ -65,9 +66,11 @@ const App = () => {
                 <TasksProvider>
                   <TeamsProvider>
                     <MembersProvider>
-                      <NavigationHandler>
-                        <AppRoutes />
-                      </NavigationHandler>
+                      <PaymentProvider>
+                        <NavigationHandler>
+                          <AppRoutes />
+                        </NavigationHandler>
+                      </PaymentProvider>
                     </MembersProvider>
                   </TeamsProvider>
                 </TasksProvider>

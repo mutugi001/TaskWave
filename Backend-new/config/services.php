@@ -34,11 +34,15 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-    
+
     'whatsapp' => [
     'token'           => env('WHATSAPP_ACCESS_TOKEN'),
     'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
     'verify_token'    => env('WHATSAPP_WEBHOOK_VERIFY_TOKEN'),
 ],
+    'stripe' => [
+        'key' => env('STRIPE_PUBLIC_KEY'),
+        'secret' => env('STRIPE_SECRET_KEY'),
+    ],
 
 ];
