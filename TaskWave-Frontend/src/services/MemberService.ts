@@ -75,7 +75,6 @@ export type UpdateMemberPayload = Partial<Omit<Member, 'id' | 'created_at' | 'up
 const getAllMembers = async (): Promise<Member[]> => {
     try {
         const response = await apiClient.get<Member[]>(`/api/members/allMembers`);
-        console.log('Members fetched:', response.data);
         return response.data;
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
@@ -92,13 +91,11 @@ const getAllMembers = async (): Promise<Member[]> => {
 const getMemberById = async (memberId: number): Promise<Member | null> => {
     try {
         const response = await apiClient.get<Member>(`/api/members/${memberId}`);
-        console.log('Member fetched:', response.data);
         return response.data;
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
         console.error(`Failed to fetch member ${memberId}:`, axiosError.response?.data || axiosError.message);
         if (axiosError.response?.status === 404) {
-            console.log(`Member ${memberId} not found.`);
             return null;
         }
         throw error;
@@ -113,7 +110,6 @@ const getMemberById = async (memberId: number): Promise<Member | null> => {
 const getMembersByTeamId = async (teamId: number): Promise<Member[]> => {
     try {
         const response = await apiClient.get<Member[]>(`/api/members/${teamId}/index`);
-        console.log('Members fetched for team:', response.data);
         return response.data;
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
@@ -184,7 +180,6 @@ const updateMember = async (memberId: number, payload: UpdateMemberPayload): Pro
                 'X-XSRF-TOKEN': Cookies.get('XSRF-TOKEN') || '',
             },
         });
-        console.log(`Member ${memberId} updated:`, response.data);
         return response.data;
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
@@ -201,7 +196,6 @@ const updateMember = async (memberId: number, payload: UpdateMemberPayload): Pro
 const deleteMember = async (memberId: number): Promise<void> => {
     try {
         await apiClient.delete(`/api/members/${memberId}/destroy`);
-        console.log('Member deleted:', memberId);
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
         console.error(`Failed to delete member ${memberId}:`, axiosError.response?.data || axiosError.message);

@@ -110,14 +110,11 @@ const getTasksForProject = async (projectId: number): Promise<Task[]> => {
  */
 const createTaskForProject = async (projectId: number, payload: NewTaskPayload): Promise<Task> => {
     const xsrfToken = Cookies.get('XSRF-TOKEN');
-    console.log(payload);
     try {
         payload.project_id = projectId; // Ensure the payload has the project ID
-        console.log('Payload for creating task:', payload); // Debug log
         const response = await apiClient.post<Task>('/api/tasks/store', payload, {
             headers: { 'X-XSRF-TOKEN': xsrfToken || '' }, // Add if CSRF needed here
         });
-        console.log(`Task created for project :`, response.data);
         return response.data; // Return the created task data
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
@@ -135,13 +132,11 @@ const getTaskById = async (taskId: number): Promise<Task | null> => {
     // Interceptor adds Bearer token
     try {
         const response = await apiClient.get<Task>(`/api/tasks/${taskId}`);
-        console.log('Task fetched:', response.data);
         return response.data;
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
         console.error(`Failed to fetch task ${taskId}:`, axiosError.response?.data || axiosError.message);
         if (axiosError.response?.status === 404) {
-            console.log(`Task ${taskId} not found.`);
             return null;
         }
         throw error;
@@ -162,7 +157,6 @@ const updateTask = async (taskId: number, payload: UpdateTaskPayload): Promise<T
         const response = await apiClient.post<Task>(`/api/tasks/${taskId}/update`, payload /*, {
             headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
         }*/);
-        console.log(`Task ${taskId} updated:`, response.data);
         return response.data; // Return the updated task data
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
@@ -184,7 +178,6 @@ const deleteTask = async (taskId: number): Promise<void> => {
         await apiClient.delete(`/api/tasks/${taskId}/destroy` , {
             headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
         });
-        console.log('Task deleted:', taskId);
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
         console.error(`Failed to delete task ${taskId}:`, axiosError.response?.data || axiosError.message);
@@ -200,7 +193,6 @@ const changeTaskStatus = async (taskId: number, status: 'completed' ): Promise<T
         const response = await apiClient.post<Task>(`/api/tasks/${taskId}/complete`, { status } , {
             headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
         });
-        console.log(`Task ${taskId} status updated to ${status}:`, response.data);
         return response.data; // Return the updated task data
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;

@@ -94,7 +94,6 @@ export type UpdateTeamPayload = Partial<Omit<Team, 'id' | 'created_at' | 'update
 const getTeams = async (): Promise<Team[]> => {
     try {
         const response = await apiClient.get<Team[]>('/api/teams/index');
-        console.log('Teams fetched:', response.data);
         return response.data;
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
@@ -111,13 +110,11 @@ const getTeams = async (): Promise<Team[]> => {
 const getTeamById = async (teamId: number): Promise<Team | null> => {
     try {
         const response = await apiClient.get<Team>(`/api/teams/${teamId}`);
-        console.log('Team fetched:', response.data);
         return response.data;
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
         console.error(`Failed to fetch team ${teamId}:`, axiosError.response?.data || axiosError.message);
         if (axiosError.response?.status === 404) {
-            console.log(`Team ${teamId} not found.`);
             return null;
         }
         throw error;
@@ -132,11 +129,9 @@ const getTeamById = async (teamId: number): Promise<Team | null> => {
 const createTeam = async (payload: NewTeamPayload): Promise<Team> => {
     const xsrfToken = Cookies.get('XSRF-TOKEN');
     try {
-        console.log('Payload for creating team:', payload); // Debug log
         const response = await apiClient.post<Team>('/api/teams/store', payload, {
             headers: { 'X-XSRF-TOKEN': xsrfToken || '' },
         });
-        console.log('Team created:', response.data);
         return response.data;
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
@@ -154,7 +149,6 @@ const createTeam = async (payload: NewTeamPayload): Promise<Team> => {
 const updateTeam = async (teamId: number, payload: UpdateTeamPayload): Promise<Team> => {
     try {
         const response = await apiClient.put<Team>(`/api/teams/${teamId}`, payload);
-        console.log(`Team ${teamId} updated:`, response.data);
         return response.data;
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
@@ -171,7 +165,6 @@ const updateTeam = async (teamId: number, payload: UpdateTeamPayload): Promise<T
 const deleteTeam = async (teamId: number): Promise<void> => {
     try {
         await apiClient.delete(`/api/teams/${teamId}/destroy`);
-        console.log('Team deleted:', teamId);
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
         console.error(`Failed to delete team ${teamId}:`, axiosError.response?.data || axiosError.message);

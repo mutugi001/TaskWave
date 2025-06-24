@@ -47,7 +47,6 @@ const getCsrfCookie = async (): Promise<void> => {
   try {
     const csrf = await apiClient.get('/sanctum/csrf-cookie');
 
-    console.log('CSRF cookie fetched: ', csrf);
   } catch (error) {
     // Type the error if possible, otherwise use 'unknown' or 'any'
     const axiosError = error as AxiosError<ApiError>;
@@ -70,7 +69,6 @@ const login = async (payload: LoginPayload): Promise<boolean> => {
     }
     });
 
-    console.log('Login successful');
 
     if (response.data) {
 
@@ -97,21 +95,18 @@ const register = async (payload: RegisterPayload): Promise<boolean> => {
   // console.log('csrf cookie set: ', csrf);
   // console.log('Document cookies right before POST /register:', document.cookie);
   const xsrfToken = Cookies.get('XSRF-TOKEN');
-  console.log('XSRF Token read by js-cookie:', xsrfToken);
   if (!xsrfToken) {
     console.error('CSRF TOKEN Mismatch Pre-Check: Could not read XSRF-TOKEN cookie!');
     // You might want to inform the user here
     return false;
 }
   try {
-    console.log('Registering with payload:', payload);
       // Fortify returns 2xx on successful registration (e.g., 201 or 204)
       await apiClient.post('api/register', payload, {
         headers: {
           'X-XSRF-TOKEN': xsrfToken // Set the header explicitly
       }
       });
-      console.log('Registration successful');
       return true;
   } catch (error) {
       const axiosError = error as AxiosError<ApiError>; // Use ApiError type if defined
@@ -143,24 +138,19 @@ const getUser = async (): Promise<User | null> => {
   try {
     // `Bearer ${accessToken}`
     const accessToken = localStorage.getItem('accessToken');
-    console.log('Access token read from localStorage:', accessToken);
     if (!accessToken) {
-      console.log('Access token not found in localStorage.');
       return null;
     }
 
     apiClient.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
-    console.log('Authorization header set:', apiClient.defaults.headers.common['Authorization']);
     const response = await apiClient.get<User>('/api/user');
 
-    console.log('User data fetched:', response.data);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;
     console.error('Failed to fetch user:', axiosError.response?.status);
 
     if (axiosError.response && (axiosError.response.status === 401 || axiosError.response.status === 419)) {
-      console.log('User not authenticated.');
       return null;
     }
 

@@ -74,7 +74,6 @@ const getCsrfCookie = async (): Promise<void> => {
   try {
     // No token needed for this request usually
     await apiClient.get('/sanctum/csrf-cookie');
-    console.log('CSRF cookie fetched');
   } catch (error) {
     const axiosError = error as AxiosError<ApiError>;
     console.error('Error fetching CSRF cookie:', axiosError.response?.data?.message || axiosError.message);
@@ -91,7 +90,6 @@ const getProjects = async (): Promise<PaginatedResponse<Project>> => {
   try {
     // Expecting the PaginatedResponse structure from Laravel API Resource Collection
     const response = await apiClient.get<PaginatedResponse<Project>>('/api/projects/index');
-    console.log('Projects fetched (paginated):', response.data);
     return response.data; // Return the actual projects array
   } catch (error) {
     const axiosError = error as AxiosError<ApiError>;
@@ -105,7 +103,6 @@ const getProjectById = async (projectId: number): Promise<Project | null> => {
   // Interceptor adds Bearer token
   try {
     const response = await apiClient.get<Project>(`/api/projects/${projectId}`);
-    console.log('Project fetched:', response.data);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ApiError>;
@@ -131,7 +128,6 @@ const createProject = async (payload: Partial<Project>): Promise<Project> => {
       const response = await apiClient.post<Project>('/api/projects/store', payload , {
         headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
       });
-      console.log('Project created:', response.data);
       return response.data; // Return the created project data from API
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;
@@ -154,7 +150,6 @@ const updateProject = async (projectId: number, payload: Partial<Project>): Prom
     const response = await apiClient.put<Project>(`/api/projects/${projectId}`, payload /*, {
         headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
     }*/);
-    console.log('Project updated:', response.data);
     return response.data; // Return the updated project data
   } catch (error) {
     const axiosError = error as AxiosError<ApiError>;
@@ -172,7 +167,6 @@ const deleteProject = async (projectId: number): Promise<void> => {
     await apiClient.delete(`/api/projects/${projectId}` /*, {
         headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
     }*/);
-    console.log('Project deleted:', projectId);
     // No return value needed
   } catch (error) {
     const axiosError = error as AxiosError<ApiError>;
@@ -211,7 +205,6 @@ const createwhatsapp = async (payload: Partial<Whatsappinfo>): Promise<Whatsappi
      const response = await apiClient.post<Whatsappinfo>('/api/whatsapp/store', payload , {
        headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
      });
-     console.log('whatsapp created:', response.data);
      return response.data; // Return the created project data from API
    } catch (error) {
      const axiosError = error as AxiosError<ApiError>;
@@ -234,7 +227,6 @@ const updatewhatsapp = async (payload: Partial<Whatsappinfo>): Promise<Whatsappi
     const response = await apiClient.put<Whatsappinfo>(`/api/whatsapp/update`, payload, {
         headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
     });
-    console.log('whatsapp updated:', response.data);
     return response.data; // Return the updated project data
   } catch (error) {
     const axiosError = error as AxiosError<ApiError>;
@@ -246,7 +238,6 @@ const updatewhatsapp = async (payload: Partial<Whatsappinfo>): Promise<Whatsappi
 const getwhatsappinfo = async (): Promise<Whatsappinfo> => {
   try {
     const response = await apiClient.get<Whatsappinfo>('/api/whatsapp/show');
-    console.log('WhatsApp info fetched:', response.data);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ApiError>;
@@ -266,7 +257,6 @@ interface WhatsAppMessage {
 const getWhatsAppMessages = async (): Promise<WhatsAppMessage[]> => {
   try {
     const response = await apiClient.get<WhatsAppMessage[]>('/api/whatsapp/messages');
-    console.log('WhatsApp messages fetched:', response.data);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ApiError>;
@@ -279,7 +269,6 @@ const getWhatsAppMessages = async (): Promise<WhatsAppMessage[]> => {
 const sendWhatsAppMessage = async (payload: { to: string; message: string }): Promise<any> => {
   try {
     const response = await apiClient.post<WhatsAppMessage>('/api/whatsapp/send', payload);
-    console.log('WhatsApp message sent:', response.data);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ApiError>;
@@ -292,7 +281,6 @@ const sendWhatsAppMessage = async (payload: { to: string; message: string }): Pr
 const deleteWhatsAppMessage = async (messageId: string): Promise<void> => {
   try {
     await apiClient.delete(`/api/whatsapp/messages/${messageId}`);
-    console.log('WhatsApp message deleted:', messageId);
   } catch (error) {
     const axiosError = error as AxiosError<ApiError>;
     console.error('Failed to delete WhatsApp message:', axiosError.response?.data || axiosError.message);
