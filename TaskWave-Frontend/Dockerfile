@@ -10,7 +10,7 @@ RUN npm install
 COPY . .
 
 ARG VITE_BACKEND_URL
-ENV VITE_BACKEND_URL=http://localhost:8007
+ENV VITE_BACKEND_URL=http://taskwave-backend:8007
 
 RUN npm run build
 
