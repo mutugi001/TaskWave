@@ -17,7 +17,7 @@ return [
 
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',
-       'localhost,127.0.0.1,localhost:5173,',
+       'localhost,127.0.0.1,localhost:5173,',ENV('FRONTEND_URL'),'https://taskwave.jhubafrica.com', 'https://www.taskwave.jhubafrica.com',
         Sanctum::currentApplicationUrlWithPort()
     ))),
 

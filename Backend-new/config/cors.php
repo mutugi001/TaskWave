@@ -19,9 +19,9 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173','https://taskwave.jhubafrica.com'],
+    'allowed_origins' => [ENV("FRONTEND_URL"),'https://taskwave.jhubafrica.com', 'https://www.taskwave.jhubafrica.com'],
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => ['*'],
 
     'allowed_headers' => ['*'],
 

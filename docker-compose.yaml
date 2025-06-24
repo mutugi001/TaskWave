@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: collinsmutugi/taskwave-frontend:v2.4
+    image: collinsmutugi/taskwave-frontend:v3.2
     container_name: frontend_app
     restart: unless-stopped
     depends_on:
@@ -10,10 +10,10 @@ services:
     ports:
       - "8080:80"  # Map host port 8080 to container port 80
     environment:
-      - REACT_APP_BACKEND_URL="http://localhost:8000"  # Set environment variables if needed
+      - VITE_BACKEND_URL=http://localhost:8000  # Set environment variables if needed
 
   backend:
-    image: collinsmutugi/taskwave-backend:v2.5
+    image: collinsmutugi/taskwave-backend:v3.3
     container_name: backend_app
     restart: unless-stopped
     depends_on:
@@ -66,7 +66,7 @@ services:
       - backend_data:/app/storage
 
   db:
-    image: collinsmutugi/taskwave-db:v2.1
+    image: collinsmutugi/taskwave-db:v2.4
     container_name: db_container
     restart: unless-stopped
     environment:

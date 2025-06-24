@@ -9,6 +9,9 @@ RUN npm install
 
 COPY . .
 
+ARG VITE_BACKEND_URL
+ENV VITE_BACKEND_URL=http://localhost:8000
+
 RUN npm run build
 
 

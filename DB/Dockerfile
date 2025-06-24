@@ -1,4 +1,4 @@
-FROM mysql:lts
+FROM mysql:latest
 
 ENV BACKUP_FILE=taskwave_backup.sql
 ENV BACKUP_DIR=backup

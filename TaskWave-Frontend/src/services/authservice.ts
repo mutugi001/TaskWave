@@ -62,6 +62,7 @@ const login = async (payload: LoginPayload): Promise<boolean> => {
   await getCsrfCookie();
   const xsrfToken = Cookies.get('XSRF-TOKEN');
   try {
+    console.log(apiClient);
     // Fortify usually returns 2xx on success without user data in body
     const response: AxiosResponse<Token> = await apiClient.post('api/login', payload, {
       headers: {
@@ -73,7 +74,7 @@ const login = async (payload: LoginPayload): Promise<boolean> => {
 
     if (response.data) {
 
-      localStorage.setItem('accessToken', response.data); // Store token in localStorage
+      localStorage.setItem('accessToken', response.data); // Store token string in localStorage
       return true;
     } else {
       console.error('Login successful, but accessToken not found in response.');
