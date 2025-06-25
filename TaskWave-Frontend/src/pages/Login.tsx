@@ -81,8 +81,8 @@ const Login = () => {
               TaskWave
             </h1>
           </div>
-          <Link to="/Docs" class="relative px-3 py-1.5 flex items-center justify-between gap-2 rounded-full border-2 transition-colors duration-300 ease-in-out">Docs
-          </Link>
+          {/* <Link to="/Docs" class="relative px-3 py-1.5 flex items-center justify-between gap-2 rounded-full border-2 transition-colors duration-300 ease-in-out">Docs
+          </Link> */}
             <ThemeToggle />
 
           </div>

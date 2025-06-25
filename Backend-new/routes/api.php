@@ -40,6 +40,10 @@ Route::get('/whatsapp',function (Request $request) {
     return response()->json($response->json());
 })->middleware('auth:sanctum');
 
+Route::middleware('web')->get('/sanctum/csrf-cookie', function () {
+    return response()->noContent();
+});
+
 Route::post('/register', RegistrationController::class);
 Route::post('/login', LoginController::class);
 Route::post('/logout', LogoutController::class)->middleware('auth:sanctum');
