@@ -4,15 +4,14 @@ import TaskList from '../components/TaskList';
 import { Task, TaskStatus } from '../types/task';
 import { Project } from '../types/project';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, BarChart3, TrendingUp, Clock, Target, Eye, ListChecks, User } from 'lucide-react';
+import { X, BarChart3, TrendingUp, Clock, Target, Eye, ListChecks } from 'lucide-react';
 import { statusConfig } from '../components/TaskCard';
 import { cn } from '@/lib/utils';
-import { format, set } from 'date-fns';
+import { format } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
 import { taskService } from '@/services/TaskService';
 import { projectService } from '@/services/ProjectService';
 import { authService } from '@/services/authservice';
-// import { User } from '@/types/user';
 
 const Index = () => {
   const { isAuthenticated } = useAuth();
@@ -20,14 +19,12 @@ const Index = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
-//use the get user method in authservice to get the user data
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const user = await authService.getUser();
-        console.log('Fetched user:', user);
         if (user) {
           setUser(user);
         }
@@ -56,18 +53,6 @@ const Index = () => {
     }
   }, [isAuthenticated]);
 
-  // Project stats
-  const getTotalProjects = () => projects.length;
-  const getActiveProjects = () => projects.filter(p => p.status === 'active').length;
-  const getCompletedProjects = () => projects.filter(p => p.status === 'completed').length;
-  const getOnHoldProjects = () => projects.filter(p => p.status === 'on-hold').length;
-  const getAverageProgress = () => {
-    if (!projects.length) return 0;
-    const total = projects.reduce((acc, proj) => acc + proj.progress, 0);
-    return Math.round(total / projects.length);
-  };
-
-  // Task stats
   const getTasksByStatus = (status: TaskStatus) => tasks.filter(t => t.status === status);
   const getTotalTasks = () => tasks.length;
   const getOverdueTasks = () => {
@@ -83,47 +68,42 @@ const Index = () => {
     const completedTasks = getTasksByStatus('completed');
     if (!completedTasks.length) return 0;
     const totalDays = completedTasks.reduce((acc, task) => {
-      if (task.dueDate) {
+      if (task.dueDate && task.createdAt) {
         const dueDate = new Date(task.dueDate);
-        const created = task.createdAt ? new Date(task.createdAt) : null;
-        if (created) {
-          const diff = (dueDate.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
-          return acc + Math.abs(diff);
-        }
+        const created = new Date(task.createdAt);
+        const diff = (dueDate.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+        return acc + Math.abs(diff);
       }
       return acc;
     }, 0);
     return Math.round(totalDays / completedTasks.length);
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (loading || !user) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-6">
+      <div className="w-full max-w-full mx-auto">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center space-x-2 bg-white p-2 rounded-lg shadow-sm">
-              <Target className="w-6 h-6 text-purple-600" />
-              <Eye className="w-6 h-6 text-blue-600" />
-              <ListChecks className="w-6 h-6 text-green-600" />
+              <Target className="w-5 h-5 text-purple-600" />
+              <Eye className="w-5 h-5 text-blue-600" />
+              <ListChecks className="w-5 h-5 text-green-600" />
               <div className="flex flex-col items-start">
-                <span className="font-bold text-xl text-gray-900">TaskWave</span>
+                <span className="font-bold text-base sm:text-xl text-gray-900">TaskWave</span>
                 <span className="text-xs text-gray-500">identify • monitor • manage</span>
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">{user.company_name} Dashboard</h1>
-            {/* Company Name */}
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{user.company_name} Dashboard</h1>
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-2">
             {getOverdueTasks() > 0 && <div className="px-4 py-2 bg-red-100 text-red-800 rounded-lg text-sm">{getOverdueTasks()} overdue tasks</div>}
             {getHighPriorityTasks() > 0 && <div className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm">{getHighPriorityTasks()} high priority tasks</div>}
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-white rounded-lg p-4 shadow-sm">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-blue-100 rounded-lg"><BarChart3 className="w-5 h-5 text-blue-600" /></div>
@@ -152,27 +132,27 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Status Filter */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          {['not_started','in_progress','review','completed','cancelled'].map(status => (
-            <TaskCard
-              key={status}
-              status={status as TaskStatus}
-              count={getTasksByStatus(status as TaskStatus).length}
-              onClick={() => setSelectedStatus(status as TaskStatus)}
-            />
-          ))}
-          <div className="rounded-lg p-3 bg-gradient-to-br from-gray-900 to-gray-800 text-white shadow-sm">
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-4 h-4 flex items-center justify-center text-lg font-bold">Σ</div>
-              <span className="text-xl font-semibold">{getTotalTasks()}</span>
+        <div className="overflow-x-auto mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 min-w-[600px] sm:min-w-0">
+            {['not_started','in_progress','review','completed','cancelled'].map(status => (
+              <TaskCard
+                key={status}
+                status={status as TaskStatus}
+                count={getTasksByStatus(status as TaskStatus).length}
+                onClick={() => setSelectedStatus(status as TaskStatus)}
+              />
+            ))}
+            <div className="rounded-lg p-3 bg-gradient-to-br from-gray-900 to-gray-800 text-white shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-4 h-4 flex items-center justify-center text-lg font-bold">Σ</div>
+                <span className="text-xl font-semibold">{getTotalTasks()}</span>
+              </div>
+              <h3 className="text-sm font-medium">Total Tasks</h3>
+              <p className="text-xs text-gray-300">System overview</p>
             </div>
-            <h3 className="text-sm font-medium">Total Tasks</h3>
-            <p className="text-xs text-gray-300">System overview</p>
           </div>
         </div>
 
-        {/* Modal */}
         <AnimatePresence>
           {selectedStatus && (
             <>
@@ -209,7 +189,6 @@ const Index = () => {
           )}
         </AnimatePresence>
 
-        {/* Summary Section */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <h3 className="text-lg font-semibold mb-4">Task Distribution</h3>

@@ -1,40 +1,39 @@
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
-import { useTheme } from "./ThemeProvider";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
-  // Apply/remove the 'dark' class on the <html> element for global dark mode
   useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-  }, [theme]);
+    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
+    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    const initialTheme = savedTheme || systemTheme;
+
+    setTheme(initialTheme);
+    document.documentElement.classList.toggle("dark", initialTheme === "dark");
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+  };
 
   return (
     <Button
-      variant="outline"
-      size="sm"
+      variant="ghost"
+      size="icon"
       onClick={toggleTheme}
-      aria-label="Toggle theme"
-      className="relative px-3 py-1.5 flex items-center justify-between gap-2 rounded-full border-2 transition-colors duration-300 ease-in-out"
+      className="h-9 w-9"
     >
-      {theme === 'light' ? (
-        <>
-          <Moon className="h-4 w-4 transition-all" />
-          <span className="text-xs font-medium">Dark</span>
-        </>
+      {theme === "light" ? (
+        <Moon className="h-4 w-4" />
       ) : (
-        <>
-          <Sun className="h-4 w-4 text-amber-300 transition-all" />
-          <span className="text-xs font-medium">Light</span>
-        </>
+        <Sun className="h-4 w-4" />
       )}
+      <span className="sr-only">Toggle theme</span>
     </Button>
   );
 }

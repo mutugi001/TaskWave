@@ -95,7 +95,6 @@ const register = async (payload: RegisterPayload): Promise<boolean> => {
   // console.log('csrf cookie set: ', csrf);
   // console.log('Document cookies right before POST /register:', document.cookie);
   const xsrfToken = Cookies.get('XSRF-TOKEN');
-  console.log(xsrfToken);
   if (!xsrfToken) {
     console.error('CSRF TOKEN Mismatch Pre-Check: Could not read XSRF-TOKEN cookie!');
     // You might want to inform the user here

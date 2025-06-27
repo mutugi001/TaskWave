@@ -1,11 +1,14 @@
+import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+
 import Index from "./pages/Index";
 import Projects from "./pages/Projects";
 import Teams from "./pages/Teams";
+import Docs from "./pages/Docs";
 import Users from "./pages/Users";
 import Insights from "./pages/Insights";
 import NotFound from "./pages/NotFound";
@@ -15,35 +18,30 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Chat from "./pages/Chat";
 import Settings from "./pages/Settings";
 import ResetPassword from "./pages/ResetPassword";
+
 import { AppSidebar } from "./components/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ThemeProvider } from "./components/ThemeProvider";
+
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { ProjectsProvider } from "./contexts/ProjectContext"; // <-- Import ProjectsProvider
-import { TasksProvider } from '@/contexts/TaskContext'; // <-- 1. Import TasksProvider
-import { TeamsProvider } from "@/contexts/TeamContext"; // Import TeamsProvider
+import { ProjectsProvider } from "./contexts/ProjectContext";
+import { TasksProvider } from "@/contexts/TaskContext";
+import { TeamsProvider } from "@/contexts/TeamContext";
 import { MembersProvider } from "./contexts/MemberContext";
-import { PaymentProvider } from './contexts/PaymentContext';
-import { useEffect, useState } from "react"; // Import useState
+import { PaymentProvider } from "./contexts/PaymentContext";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  // --- Auth state initialization/loading ---
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    // Efficiently check for auth state in localStorage/sessionStorage
-    // Example: check for a token or user object
     const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
     const user = localStorage.getItem("authUser") || sessionStorage.getItem("authUser");
-    // Optionally, you can dispatch/init context here if needed
-    // If your AuthProvider does this automatically, just wait a tick
     setAuthChecked(true);
   }, []);
 
   if (!authChecked) {
-    // Show loading screen while checking auth state
     return (
       <div className="flex items-center justify-center min-h-screen">
         <span className="text-lg font-semibold">Loading...</span>
@@ -52,7 +50,6 @@ const App = () => {
   }
 
   return (
-    // Assuming queryClient is defined
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
@@ -60,8 +57,6 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
-              {/* 2. Wrap AppRoutes (or relevant part) with ProjectsProvider */}
-              {/* Place it INSIDE AuthProvider */}
               <ProjectsProvider>
                 <TasksProvider>
                   <TeamsProvider>
@@ -85,27 +80,27 @@ const App = () => {
 
 export default App;
 
-// Protected route component
+// --- Protected Routes ---
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth(); // useAuth was called outside AuthProvider
+  const { isAuthenticated } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
     localStorage.setItem('lastVisitedPath', location.pathname);
   }, [location]);
 
-  if (!isAuthenticated) { // isAuthenticated was called outside AuthProvider
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;
 };
 
-// Public route component - redirects to dashboard if already logged in
+// --- Public Routes ---
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth(); // isAuthenticated was called outside AuthProvider
+  const { isAuthenticated } = useAuth();
 
-  if (isAuthenticated) { // isAuthenticated was called outside AuthProvider
+  if (isAuthenticated) {
     const lastVisitedPath = localStorage.getItem('lastVisitedPath') || '/';
     return <Navigate to={lastVisitedPath} replace />;
   }
@@ -113,29 +108,30 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// App layout with sidebar for authenticated routes
+// --- App Layout with Sidebar ---
 const AppLayout = ({ children }: { children: React.ReactNode }) => (
   <SidebarProvider>
-
-    <div className="flex flex-col min-h-screen w-full">
+    <div className="flex min-h-screen w-full overflow-x-auto">
       <AppSidebar />
-      <main className="pt-16 container mx-auto max-w-screen-2xl px-4 sm:px-6 md:px-8 py-4">
+      <main className="flex-1 pt-16 container mx-auto max-w-screen-2xl px-4 sm:px-6 md:px-8 py-4">
         {children}
       </main>
     </div>
   </SidebarProvider>
 );
 
+// --- All Routes ---
 const AppRoutes = () => {
   return (
     <Routes>
       {/* Public routes */}
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/Docs" element={<PublicRoute><Docs /></PublicRoute>} />
       <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
       <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
       <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
 
-      {/* Protected routes */}
+      {/* Protected routes (with sidebar) */}
       <Route path="/" element={<ProtectedRoute><AppLayout><Index /></AppLayout></ProtectedRoute>} />
       <Route path="/projects" element={<ProtectedRoute><AppLayout><Projects /></AppLayout></ProtectedRoute>} />
       <Route path="/teams" element={<ProtectedRoute><AppLayout><Teams /></AppLayout></ProtectedRoute>} />
@@ -144,30 +140,27 @@ const AppRoutes = () => {
       <Route path="/settings/*" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
       <Route path="/chat" element={<ProtectedRoute><AppLayout><Chat /></AppLayout></ProtectedRoute>} />
 
-      {/* 404 route */}
+      {/* Fallback 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
 
+// --- Auth-aware Navigation Handler ---
 const NavigationHandler = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const publicPaths = ['/login', '/signup', '/forgot-password', '/reset-password'];
+    const publicPaths = ['/login', '/Docs', '/signup', '/forgot-password', '/reset-password'];
     const lastVisitedPath = localStorage.getItem('lastVisitedPath') || '/';
-    if (!isAuthenticated) {
-      // Only redirect to /login if not already on a public path
-      if (!publicPaths.includes(location.pathname)) {
-        localStorage.setItem('lastVisitedPath', location.pathname);
-        navigate('/login', { replace: true });
-      }
-    } else {
-      if (publicPaths.includes(location.pathname)) {
-        navigate(lastVisitedPath, { replace: true });
-      }
+
+    if (!isAuthenticated && !publicPaths.includes(location.pathname)) {
+      localStorage.setItem('lastVisitedPath', location.pathname);
+      navigate('/login', { replace: true });
+    } else if (isAuthenticated && publicPaths.includes(location.pathname)) {
+      navigate(lastVisitedPath, { replace: true });
     }
   }, [isAuthenticated, navigate, location.pathname]);
 

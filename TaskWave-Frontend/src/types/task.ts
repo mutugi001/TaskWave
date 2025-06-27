@@ -9,4 +9,6 @@ export type Task = {
   dueDate: Date;
   priority: 'low' | 'medium' | 'high';
   assignee: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
