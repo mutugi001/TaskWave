@@ -36,6 +36,8 @@ jobs:
           context: ./Backend-new/
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/taskwave-backend:${{ github.sha }}, ${{ secrets.DOCKER_USERNAME }}/taskwave-backend:latest
+          build-args:
+              APP_KEY=${{ secrets.APP_KEY }}
       
       - name: Build and push db image
         uses: docker/build-push-action@v3
