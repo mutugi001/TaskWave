@@ -34,9 +34,10 @@ RUN ls -la
 
 RUN composer install
 # RUN composer dump-autoload
-# ENV APP_KEY=base64:PKDArkwcUH4VvuZ8Auiti0o04iof9ejI4BMmWYFBNBo=
+ARG APP_KEY
+ENV APP_KEY=${APP_KEY}
 
-RUN php artisan key:generate
+# RUN php artisan key:generate
 
 EXPOSE 8000
 
