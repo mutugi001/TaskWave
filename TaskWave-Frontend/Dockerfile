@@ -10,7 +10,10 @@ RUN npm install
 COPY . .
 
 ARG VITE_BACKEND_URL
-ENV VITE_BACKEND_URL=https://taskwave-api.jhubafrica.com/
+ENV VITE_BACKEND_URL=https://taskwave-api.jhubafrica.com
+
+# ARG VITE_BACKEND_URL
+# ENV VITE_BACKEND_URL=http://localhost:8000
 
 RUN npm run build
 
@@ -21,7 +24,7 @@ COPY --from=buildstage /app/dist /usr/share/nginx/html
 
 COPY --from=buildstage /app/default.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+EXPOSE 81
 
 CMD ["nginx", "-g", "daemon off;"]
 

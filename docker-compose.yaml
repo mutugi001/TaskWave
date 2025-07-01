@@ -2,13 +2,13 @@ version: '3.8'
 
 services:
   app:
-    image: collinsmutugi/taskwave-frontend:v3.2
+    image: collinsmutugi/taskwave-frontend:v3.9
     container_name: frontend_app
     restart: unless-stopped
     depends_on:
       - backend
     ports:
-      - "8080:80"  # Map host port 8080 to container port 80
+      - "8081:80"  # Map host port 8080 to container port 80
     environment:
       - VITE_BACKEND_URL=http://localhost:8000  # Set environment variables if needed
 
@@ -61,12 +61,12 @@ services:
       - MAIL_FROM_ADDRESS="taskwaveinfo@gmail.com"
       - MAIL_FROM_NAME="TaskWave"
       - VITE_APP_NAME="${APP_NAME}"
-      - FRONTEND_URL=http://localhost:8080
+      - FRONTEND_URL=http://localhost:8081
     volumes:
       - backend_data:/app/storage
 
   db:
-    image: collinsmutugi/taskwave-db:v2.4
+    image: collinsmutugi/taskwave-db:v2.6
     container_name: db_container
     restart: unless-stopped
     environment:
