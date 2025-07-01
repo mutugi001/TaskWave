@@ -313,3 +313,5 @@ CREATE TABLE `whatsapps` (
 
 LOCK TABLES `whatsapps` WRITE;
 UNLOCK TABLES;
+
+ALTER TABLE sessions MODIFY user_id CHAR(36) NULL;
