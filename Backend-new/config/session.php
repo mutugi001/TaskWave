@@ -156,7 +156,7 @@ return [
     |
     */
 
-    'domain' => '.jhubafrica.com', env('SESSION DOMAIN'),
+    'domain' => '.jhubafrica.com',
 
     /*
     |--------------------------------------------------------------------------
