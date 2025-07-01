@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [ENV('FRONTEND_URL'),'https://taskwave.jhubafrica.com', 'https://www.taskwave.jhubafrica.com', 'https://localhost:8081'],
+    'allowed_origins' => ['https://taskwave.jhubafrica.com', 'https://www.taskwave.jhubafrica.com'],
 
     'allowed_origins_patterns' => ['*'],
 

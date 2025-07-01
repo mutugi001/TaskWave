@@ -10,7 +10,7 @@ RUN npm install
 COPY . .
 
 ARG VITE_BACKEND_URL
-ENV VITE_BACKEND_URL=https://taskwave-api.jhubafrica.com
+ENV VITE_BACKEND_URL=https://taskwave-api.jhubafrica.com/
 
 # ARG VITE_BACKEND_URL
 # ENV VITE_BACKEND_URL=http://localhost:8000
