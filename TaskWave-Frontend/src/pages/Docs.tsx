@@ -217,7 +217,7 @@ function DocumentationPage() {
                 <StepCard
                   number="1"
                   title="WhatsApp API Setup"
-                  image="/TaskWave Docs/whatsapp-Management.png"
+                  image="/TaskWave-Docs/whatsapp-Management.png"
                 >
                   <p>
                     Configure your WhatsApp Business API credentials to enable seamless task notifications.
@@ -249,7 +249,7 @@ function DocumentationPage() {
                 <StepCard
                   number="2"
                   title="Create Teams"
-                  image="/TaskWave Docs/Team.png"
+                  image="/TaskWave-Docs/Team.png"
                 >
                   <p>
                     Organize your workforce by creating dedicated teams for different departments or project types.
@@ -270,7 +270,7 @@ function DocumentationPage() {
                 <StepCard
                   number="3"
                   title="Add Team Members"
-                  image="/TaskWave Docs/user.png"
+                  image="/TaskWave-Docs/user.png"
                 >
                   <p>
                     Add your team members with their complete details. Ensure all phone numbers are registered
@@ -291,7 +291,7 @@ function DocumentationPage() {
                 <StepCard
                   number="4"
                   title="Create Your First Project"
-                  image="/TaskWave Docs/new-project.png"
+                  image="/TaskWave-Docs/new-project.png"
                 >
                   <p>
                     Set up your projects with clear objectives, deadlines, and team assignments.
@@ -306,7 +306,7 @@ function DocumentationPage() {
                       Once created, your projects will appear in the main dashboard with status indicators and progress tracking.
                     </p>
                     <img
-                      src="/TaskWave Docs/project-index.png"
+                      src="/TaskWave-Docs/project-index.png"
                       alt="Project overview"
                       className="rounded-lg border border-gray-200 dark:border-gray-700 shadow-md max-w-full"
                     />
@@ -327,7 +327,7 @@ function DocumentationPage() {
                 <StepCard
                   number="5"
                   title="Create and Assign Tasks"
-                  image="/TaskWave Docs/task.png"
+                  image="/TaskWave-Docs/task.png"
                 >
                   <p>
                     Create detailed tasks with clear descriptions, deadlines, and priority levels.
@@ -360,7 +360,7 @@ function DocumentationPage() {
                       Monitor all tasks within your projects through an intuitive interface with real-time status updates.
                     </p>
                     <img
-                      src="/TaskWave Docs/task-list.png"
+                      src="/TaskWave-Docs/task-list.png"
                       alt="Task management dashboard"
                       className="rounded-lg border border-gray-200 dark:border-gray-700 shadow-md max-w-full"
                     />
