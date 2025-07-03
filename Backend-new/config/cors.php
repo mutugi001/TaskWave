@@ -19,7 +19,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://taskwave.jhubafrica.com', 'https://www.taskwave.jhubafrica.com'],
+    'allowed_origins' => ['https://taskwave.jhubafrica.com', 'https://www.taskwave.jhubafrica.com','capacitor://localhost',
+    'http://localhost',
+    'http://localhost:8080',
+    'http://localhost:3000',],
 
     'allowed_origins_patterns' => ['*'],
 
