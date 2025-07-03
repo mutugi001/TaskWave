@@ -156,7 +156,16 @@ return [
     |
     */
 
-    'domain' => '.jhubafrica.com',
+    'domain' => function () {
+    $host = request()->getHost();
+
+    // Allow localhost and capacitor
+    if ($host === 'localhost' || str_contains($host, '127.0.0.1') || str_contains($host, 'capacitor')) {
+        return null;
+    }
+
+    return '.jhubafrica.com';
+},
 
     /*
     |--------------------------------------------------------------------------
