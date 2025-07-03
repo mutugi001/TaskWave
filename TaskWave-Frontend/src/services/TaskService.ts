@@ -57,16 +57,16 @@ interface ApiError {
 
 // --- Authentication Service Functions ---
 
-const getCsrfCookie = async (): Promise<void> => {
-  try {
-    await apiClient.get('/sanctum/csrf-cookie');
-    console.log('CSRF cookie fetched');
-  } catch (error) {
-    const axiosError = error as AxiosError<ApiError>;
-    console.error('Error fetching CSRF cookie:', axiosError.response?.data?.message || axiosError.message);
-    throw error;
-  }
-};
+// const getCsrfCookie = async (): Promise<void> => {
+//   try {
+//     await apiClient.get('/sanctum/csrf-cookie');
+//     console.log('CSRF cookie fetched');
+//   } catch (error) {
+//     const axiosError = error as AxiosError<ApiError>;
+//     console.error('Error fetching CSRF cookie:', axiosError.response?.data?.message || axiosError.message);
+//     throw error;
+//   }
+// };
 
 
 // --- Task Service Functions ---
@@ -112,9 +112,7 @@ const createTaskForProject = async (projectId: number, payload: NewTaskPayload):
     const xsrfToken = Cookies.get('XSRF-TOKEN');
     try {
         payload.project_id = projectId; // Ensure the payload has the project ID
-        const response = await apiClient.post<Task>('/api/tasks/store', payload, {
-            headers: { 'X-XSRF-TOKEN': xsrfToken || '' }, // Add if CSRF needed here
-        });
+        const response = await apiClient.post<Task>('/api/tasks/store', payload);
         return response.data; // Return the created task data
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
@@ -175,9 +173,7 @@ const deleteTask = async (taskId: number): Promise<void> => {
     const xsrfToken = Cookies.get('XSRF-TOKEN');
     try {
         // Expecting 204 No Content on successful delete
-        await apiClient.delete(`/api/tasks/${taskId}/destroy` , {
-            headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
-        });
+        await apiClient.delete(`/api/tasks/${taskId}/destroy`);
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
         console.error(`Failed to delete task ${taskId}:`, axiosError.response?.data || axiosError.message);
@@ -187,12 +183,9 @@ const deleteTask = async (taskId: number): Promise<void> => {
 // function to chnage task status to completed
 const changeTaskStatus = async (taskId: number, status: 'completed' ): Promise<Task> => {
     // Interceptor adds Bearer token
-    const xsrfToken = Cookies.get('XSRF-TOKEN');
     try {
         // Use PUT or PATCH based on your API design
-        const response = await apiClient.post<Task>(`/api/tasks/${taskId}/complete`, { status } , {
-            headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
-        });
+        const response = await apiClient.post<Task>(`/api/tasks/${taskId}/complete`, { status });
         return response.data; // Return the updated task data
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
@@ -205,7 +198,7 @@ const changeTaskStatus = async (taskId: number, status: 'completed' ): Promise<T
 // --- Exports ---
 
 export const authService = {
-  getCsrfCookie,
+  // getCsrfCookie,
 
 };
 

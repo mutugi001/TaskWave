@@ -69,16 +69,16 @@ interface ApiError {
 
 // --- Authentication Service Functions ---
 
-const getCsrfCookie = async (): Promise<void> => {
-  try {
-    // No token needed for this request usually
-    await apiClient.get('/sanctum/csrf-cookie');
-  } catch (error) {
-    const axiosError = error as AxiosError<ApiError>;
-    console.error('Error fetching CSRF cookie:', axiosError.response?.data?.message || axiosError.message);
-    throw error;
-  }
-};
+// const getCsrfCookie = async (): Promise<void> => {
+//   try {
+//     // No token needed for this request usually
+//     await apiClient.get('/sanctum/csrf-cookie');
+//   } catch (error) {
+//     const axiosError = error as AxiosError<ApiError>;
+//     console.error('Error fetching CSRF cookie:', axiosError.response?.data?.message || axiosError.message);
+//     throw error;
+//   }
+// };
 
 // --- Project Service Functions ---
 
@@ -121,11 +121,8 @@ const createProject = async (payload: Partial<Project>): Promise<Project> => {
    // const xsrfToken = Cookies.get('XSRF-TOKEN'); // Only needed if /api/projects requires CSRF
    //append user-id to payload if needed
   try {
-    const xsrfToken = Cookies.get('XSRF-TOKEN');
     try {
-      const response = await apiClient.post<Project>('/api/projects/store', payload , {
-        headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
-      });
+      const response = await apiClient.post<Project>('/api/projects/store', payload);
       return response.data; // Return the created project data from API
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;
@@ -141,12 +138,9 @@ const createProject = async (payload: Partial<Project>): Promise<Project> => {
 
 // Update an existing project
 const updateProject = async (projectId: number, payload: Partial<Project>): Promise<Project> => {
-  const xsrfToken = Cookies.get('XSRF-TOKEN'); // Optional if CSRF is required
   try {
     // Use PUT or PATCH depending on your API design
-    const response = await apiClient.post<Project>(`/api/projects/${projectId}/update`, payload, {
-      headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Include CSRF token if needed
-    });
+    const response = await apiClient.post<Project>(`/api/projects/${projectId}/update`, payload);
     return response.data; // Return the updated project data
   } catch (error) {
     const axiosError = error as AxiosError<ApiError>;
@@ -158,12 +152,9 @@ const updateProject = async (projectId: number, payload: Partial<Project>): Prom
 // Delete a project
 const deleteProject = async (projectId: number): Promise<void> => {
    // Interceptor adds Bearer token & CSRF might not be needed
-   const xsrfToken = Cookies.get('XSRF-TOKEN');
   try {
     // Expecting 204 No Content on successful delete usually
-    await apiClient.delete(`/api/projects/${projectId}/destroy` , {
-        headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
-    });
+    await apiClient.delete(`/api/projects/${projectId}/destroy`);
     // No return value needed
   } catch (error) {
     const axiosError = error as AxiosError<ApiError>;
@@ -175,9 +166,9 @@ const deleteProject = async (projectId: number): Promise<void> => {
 // --- Exports ---
 
 // Export auth functions
-export const authService = {
-  getCsrfCookie,
-};
+// export const authService = {
+//   getCsrfCookie,
+// };
 
 // Export project functions
 export const projectService = {

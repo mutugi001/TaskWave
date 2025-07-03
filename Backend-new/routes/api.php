@@ -56,7 +56,6 @@ Route::post('/reset-password', [ForgotPasswordController::class, 'reset']);
 // });
 
 Route::middleware([
-    'web',
     'auth:sanctum',
 ])->group(function () {
     Route::prefix('projects')->controller(ProjectController::class)->group(function() {

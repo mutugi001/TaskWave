@@ -136,7 +136,6 @@ const getMembers = async (teamId: number): Promise<Member[]> => {
  * @returns Promise<Member> The newly created member data from the API.
  */
 const createMember = async (payload: NewMemberPayload): Promise<Member> => {
-    const xsrfToken = Cookies.get('XSRF-TOKEN');
     const formData = new FormData();
 
     // Append fields to FormData
@@ -151,12 +150,7 @@ const createMember = async (payload: NewMemberPayload): Promise<Member> => {
     });
 
     try {
-        const response = await apiClient.post<Member>('/api/members/store', formData, {
-            headers: {
-                'X-XSRF-TOKEN': xsrfToken || '',
-                'Content-Type': 'multipart/form-data',
-            },
-        });
+        const response = await apiClient.post<Member>('/api/members/store', formData);
         console.log('Member created:', response.data);
         return response.data;
     } catch (error) {
@@ -175,11 +169,7 @@ const createMember = async (payload: NewMemberPayload): Promise<Member> => {
 const updateMember = async (memberId: number, payload: UpdateMemberPayload): Promise<Member> => {
   console.log('Payload for updating member:', payload); // Debug log
     try {
-        const response = await apiClient.post<Member>(`/api/members/${memberId}/update`, payload, {
-            headers: {
-                'X-XSRF-TOKEN': Cookies.get('XSRF-TOKEN') || '',
-            },
-        });
+        const response = await apiClient.post<Member>(`/api/members/${memberId}/update`, payload);
         return response.data;
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;

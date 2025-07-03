@@ -43,31 +43,26 @@ interface ApiError {
 
 // --- Service Functions ---
 
-const getCsrfCookie = async (): Promise<void> => {
-  try {
-    const csrf = await apiClient.get('/sanctum/csrf-cookie');
+// const getCsrfCookie = async (): Promise<void> => {
+//   try {
+//     const csrf = await apiClient.get('/sanctum/csrf-cookie');
 
-  } catch (error) {
-    // Type the error if possible, otherwise use 'unknown' or 'any'
-    const axiosError = error as AxiosError<ApiError>;
-    console.error('Error fetching CSRF cookie:', axiosError.response?.data?.message || axiosError.message);
-    // Re-throw or handle as needed
-    throw error;
-  }
-};
+//   } catch (error) {
+//     // Type the error if possible, otherwise use 'unknown' or 'any'
+//     const axiosError = error as AxiosError<ApiError>;
+//     console.error('Error fetching CSRF cookie:', axiosError.response?.data?.message || axiosError.message);
+//     // Re-throw or handle as needed
+//     throw error;
+//   }
+// };
 
 // Login returns a boolean indicating success/failure for easier handling in context/component
 const login = async (payload: LoginPayload): Promise<boolean> => {
-  await getCsrfCookie();
   const xsrfToken = Cookies.get('XSRF-TOKEN');
   try {
     console.log(apiClient);
     // Fortify usually returns 2xx on success without user data in body
-    const response: AxiosResponse<Token> = await apiClient.post('api/login', payload, {
-      headers: {
-        'X-XSRF-TOKEN': xsrfToken, // Set the header explicitly
-    }
-    });
+    const response: AxiosResponse<Token> = await apiClient.post('api/login', payload);
 
 
     if (response.data) {
@@ -91,22 +86,16 @@ const login = async (payload: LoginPayload): Promise<boolean> => {
 
 // --- Add Register Function ---
 const register = async (payload: RegisterPayload): Promise<boolean> => {
-  await getCsrfCookie(); // Ensure CSRF cookie is set
   // console.log('csrf cookie set: ', csrf);
   // console.log('Document cookies right before POST /register:', document.cookie);
-  const xsrfToken = Cookies.get('XSRF-TOKEN');
-  if (!xsrfToken) {
-    console.error('CSRF TOKEN Mismatch Pre-Check: Could not read XSRF-TOKEN cookie!');
-    // You might want to inform the user here
-    return false;
-}
+//   if (!xsrfToken) {
+//     console.error('CSRF TOKEN Mismatch Pre-Check: Could not read XSRF-TOKEN cookie!');
+//     // You might want to inform the user here
+//     return false;
+// }
   try {
       // Fortify returns 2xx on successful registration (e.g., 201 or 204)
-      await apiClient.post('api/register', payload, {
-        headers: {
-          'X-XSRF-TOKEN': xsrfToken // Set the header explicitly
-      }
-      });
+      await apiClient.post('api/register', payload);
       return true;
   } catch (error) {
       const axiosError = error as AxiosError<ApiError>; // Use ApiError type if defined
@@ -136,32 +125,36 @@ const logout = async () => {
 // Fetches the currently authenticated user or null
 const getUser = async (): Promise<User | null> => {
   try {
-    // `Bearer ${accessToken}`
     const accessToken = localStorage.getItem('accessToken');
     if (!accessToken) {
+      console.warn('No access token found.');
       return null;
     }
 
-    apiClient.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
-    const response = await apiClient.get<User>('/api/user');
+    const response = await apiClient.get<User>('/api/user', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
 
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;
-    console.error('Failed to fetch user:', axiosError.response?.status);
 
-    if (axiosError.response && (axiosError.response.status === 401 || axiosError.response.status === 419)) {
+    console.error('Failed to fetch user:', axiosError.response?.status || axiosError.message);
+
+    if (axiosError.response && [401, 419].includes(axiosError.response.status)) {
+      // Token expired or invalid
       return null;
     }
 
-    // For other errors (network, server), re-throw the error
-    throw error;
+    throw error; // Re-throw for other errors
   }
 };
 
 // Export functions grouped in an object
 export const authService = {
-  getCsrfCookie,
+  // getCsrfCookie,
   login,
   register,
   logout,

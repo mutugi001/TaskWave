@@ -70,16 +70,16 @@ interface ApiError {
 
 // --- Authentication Service Functions ---
 
-const getCsrfCookie = async (): Promise<void> => {
-  try {
-    // No token needed for this request usually
-    await apiClient.get('/sanctum/csrf-cookie');
-  } catch (error) {
-    const axiosError = error as AxiosError<ApiError>;
-    console.error('Error fetching CSRF cookie:', axiosError.response?.data?.message || axiosError.message);
-    throw error;
-  }
-};
+// const getCsrfCookie = async (): Promise<void> => {
+//   try {
+//     // No token needed for this request usually
+//     await apiClient.get('/sanctum/csrf-cookie');
+//   } catch (error) {
+//     const axiosError = error as AxiosError<ApiError>;
+//     console.error('Error fetching CSRF cookie:', axiosError.response?.data?.message || axiosError.message);
+//     throw error;
+//   }
+// };
 
 // --- Project Service Functions ---
 
@@ -125,9 +125,7 @@ const createProject = async (payload: Partial<Project>): Promise<Project> => {
   try {
     const xsrfToken = Cookies.get('XSRF-TOKEN');
     try {
-      const response = await apiClient.post<Project>('/api/projects/store', payload , {
-        headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
-      });
+      const response = await apiClient.post<Project>('/api/projects/store');
       return response.data; // Return the created project data from API
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;
@@ -179,7 +177,7 @@ const deleteProject = async (projectId: number): Promise<void> => {
 
 // Export auth functions
 export const authService = {
-  getCsrfCookie,
+  // getCsrfCookie,
 };
 
 // Export project functions
@@ -202,9 +200,7 @@ const createwhatsapp = async (payload: Partial<Whatsappinfo>): Promise<Whatsappi
  try {
    const xsrfToken = Cookies.get('XSRF-TOKEN');
    try {
-     const response = await apiClient.post<Whatsappinfo>('/api/whatsapp/store', payload , {
-       headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
-     });
+     const response = await apiClient.post<Whatsappinfo>('/api/whatsapp/store', payload);
      return response.data; // Return the created project data from API
    } catch (error) {
      const axiosError = error as AxiosError<ApiError>;
@@ -224,9 +220,7 @@ const updatewhatsapp = async (payload: Partial<Whatsappinfo>): Promise<Whatsappi
   const xsrfToken = Cookies.get('XSRF-TOKEN');
   try {
     // Use PUT or PATCH depending on your API design (PUT usually replaces)
-    const response = await apiClient.put<Whatsappinfo>(`/api/whatsapp/update`, payload, {
-        headers: { 'X-XSRF-TOKEN': xsrfToken || '' } // Add if CSRF needed here
-    });
+    const response = await apiClient.put<Whatsappinfo>(`/api/whatsapp/update`, payload);
     return response.data; // Return the updated project data
   } catch (error) {
     const axiosError = error as AxiosError<ApiError>;

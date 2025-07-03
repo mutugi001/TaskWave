@@ -57,16 +57,16 @@ interface ApiError {
 
 // --- Authentication Service Functions ---
 
-const getCsrfCookie = async (): Promise<void> => {
-  try {
-    await apiClient.get('/sanctum/csrf-cookie');
-    console.log('CSRF cookie fetched');
-  } catch (error) {
-    const axiosError = error as AxiosError<ApiError>;
-    console.error('Error fetching CSRF cookie:', axiosError.response?.data?.message || axiosError.message);
-    throw error;
-  }
-};
+// const getCsrfCookie = async (): Promise<void> => {
+//   try {
+//     await apiClient.get('/sanctum/csrf-cookie');
+//     console.log('CSRF cookie fetched');
+//   } catch (error) {
+//     const axiosError = error as AxiosError<ApiError>;
+//     console.error('Error fetching CSRF cookie:', axiosError.response?.data?.message || axiosError.message);
+//     throw error;
+//   }
+// };
 // --- Team Type Definitions ---
 
 // Team type based on API response
@@ -129,9 +129,7 @@ const getTeamById = async (teamId: number): Promise<Team | null> => {
 const createTeam = async (payload: NewTeamPayload): Promise<Team> => {
     const xsrfToken = Cookies.get('XSRF-TOKEN');
     try {
-        const response = await apiClient.post<Team>('/api/teams/store', payload, {
-            headers: { 'X-XSRF-TOKEN': xsrfToken || '' },
-        });
+        const response = await apiClient.post<Team>('/api/teams/store', payload);
         return response.data;
     } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
@@ -175,7 +173,7 @@ const deleteTeam = async (teamId: number): Promise<void> => {
 // --- Exports ---
 
 export const authService = {
-  getCsrfCookie,
+  // getCsrfCookie,
 
 };
 
