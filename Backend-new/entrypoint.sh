@@ -6,9 +6,8 @@ until php artisan migrate --force; do
   sleep 2
 done
 
-php artisan config:clear
-php artisan config:cache
 php artisan cache:clear
+php artisan config:cache
 php artisan route:clear
 php artisan view:clear
 
