@@ -112,18 +112,11 @@ class MemberController extends Controller
         ]);
 
         // Handle blob profile picture upload
-        if ($request->hasFile('profile_picture')) {
-            $file = $request->file('profile_picture');
-            $imagePath = $file->store('profile_pictures', 'public'); // Store in 'storage/app/public/profile_pictures'
-
-            // Save the full URL
-            $validatedData['profile_picture'] = url('storage/' . $imagePath);
-
-            // Optionally, delete the old profile picture
-            if ($member->profile_picture) {
-                $oldPath = str_replace(url('storage/'), '', $member->profile_picture);
-                Storage::disk('public')->delete($oldPath);
-            }
+        if ($request->hasFile('profilePhoto')) {
+            $image = $request->file('profilePhoto');
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('profile_photos'), $imageName);
+            $validatedData['profilePhoto'] = url('profile_photos/' . $imageName);
         }
 
         $member->update($validatedData);

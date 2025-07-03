@@ -368,14 +368,7 @@ export default function Users() {
               <Avatar className="w-24 h-24 mx-auto">
                 {user.profile_picture ? (
                   <AvatarImage
-                    src={
-                      // Try to handle both absolute URLs and Laravel's url('storage/...') output
-                      user.profile_picture.startsWith("http")
-                        ? user.profile_picture
-                        : user.profile_picture.startsWith("/storage/")
-                          ? user.profile_picture
-                          : `/storage/${user.profile_picture.replace(/^profile_pictures\//, "")}`
-                    }
+                    src={user.profile_picture}
                     alt={`${user.name}'s profile picture`}
                   />
                 ) : (
