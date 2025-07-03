@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Request;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+         $host = Request::getHost();
+
+        if ($host === 'localhost' || str_contains($host, '127.0.0.1') || str_contains($host, 'capacitor')) {
+            Config::set('session.domain', null);
+        } else {
+            Config::set('session.domain', '.jhubafrica.com');
+        }
     }
 }
