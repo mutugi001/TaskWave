@@ -170,15 +170,15 @@ class TaskController extends Controller
                         $whatsappDetails = Whatsapp::where('user_id', Auth::user()->id)->first();
                         if (!$whatsappDetails) {
                             return response()->json(['message' => 'WhatsApp configuration not found'], 404);
-                        }
-                        $whatsappService = new \\App\\Services\\WhatsAppService();
+                        };
+                        $whatsappService = new \App\Services\WhatsAppService();
                         $response = $whatsappService->sendMessage(
                             $to,
                             $message,
                             $whatsappDetails->number,
                             $whatsappDetails->token
                         );
-                    } catch (\\Exception $e) {
+                    } catch (\Exception $e) {
                         return response()->json([
                             'status' => 'error',
                             'message' => $e->getMessage(),

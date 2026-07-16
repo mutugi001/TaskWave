@@ -20,10 +20,3 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })->create();
 
-
-public function boot(): void
-{
-    if (app()->environment('production')) {
-        URL::forceScheme('https');
-    }
-}
