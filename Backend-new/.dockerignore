@@ -1,9 +1,16 @@
+.git
+.github
+
+node_modules
 vendor
-.env.*
-.vscode
-*.log
-.gitignore
-/public/storage
+
+storage/logs/*
+storage/framework/*
+
 .env
 
+Dockerfile.old
 
+tests
+
+README.md

@@ -3,6 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\URL;
+
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,3 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
+
+
+public function boot(): void
+{
+    if (app()->environment('production')) {
+        URL::forceScheme('https');
+    }
+}

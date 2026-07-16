@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\URL;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +29,9 @@ class AppServiceProvider extends ServiceProvider
             Config::set('session.domain', null);
         } else {
             Config::set('session.domain', '.jhubafrica.com');
+        }
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
         }
     }
 }
