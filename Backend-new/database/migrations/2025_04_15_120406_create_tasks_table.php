@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('description');
             $table->string('status')->nullable();
             $table->date('due_date');
-            $table->string('assigned_team')->nullable();
+            $table->foreignUlid('assigned_team')->nullable()->constrained('teams')->nullOnDelete();
             $table->timestamps();
         });
 

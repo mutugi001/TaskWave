@@ -24,9 +24,8 @@ return new class extends Migration
 
         Schema::create('member_team', function (Blueprint $table) {
             $table->uuid('member_id');
-            $table->uuid('team_id');
+            $table->foreignUlid('team_id')->constrained('teams')->onDelete('cascade');
             $table->foreign('member_id')->references('id')->on('members')->onDelete('cascade');
-            $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
             $table->primary(['member_id', 'team_id']);
         });
     }

@@ -49,7 +49,7 @@ class Task extends Model
 
     public function team()
     {
-        return $this->belongsTo(Team::class);
+        return $this->belongsTo(Team::class, 'assigned_team');
     }
 
     public static function countTasksByStatus($projectId, $status)

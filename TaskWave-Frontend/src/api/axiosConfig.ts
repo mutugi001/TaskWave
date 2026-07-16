@@ -14,20 +14,7 @@ const apiClient: AxiosInstance = axios.create({
   }
 });
 
-// apiClient.interceptors.request.use(
-//   config => {
-//     console.log('Axios Request Config Headers:', config.headers);
-//     // Check specifically if X-XSRF-TOKEN is present here
-//     if (config.headers) {
-//          console.log('Does config.headers have X-XSRF-TOKEN?', config.headers['X-XSRF-TOKEN']);
-//     }
-//     return config; // Must return config for request to proceed
-//   },
-//   error => {
-//     console.error('Axios Request Interceptor Error:', error);
-//     return Promise.reject(error);
-//   }
-// );
+
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
   if (token) {

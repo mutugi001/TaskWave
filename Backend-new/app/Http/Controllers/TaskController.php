@@ -143,42 +143,48 @@ class TaskController extends Controller
             'status' => 'sometimes|required|string|in:not_started,in_progress,review,completed,cancelled',
             'due_date' => 'sometimes|required|date',
             'priority' => 'sometimes|required|string|in:low,medium,high',
-            'assigned_team' => 'nullable|string|max:255',
+            'assigned_team' => 'nullable|exists:teams,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $team = Team::find($request->assigned_team);
-        $members = $team->members()->get();
-        foreach($members as $member){
-            $to = (string) $member->phone;
-            $message =
-                'Hello, you have been assigned a new task:' . "\n" .
-                'Title: ' . $request->title . "\n" .
-                'Description: ' . $request->description . "\n" .
-                'Due Date: ' . $request->due_date . "\n" .
-                'Priority: ' . $request->priority . "\n" .
-                'Status: ' . $request->status . "\n" .
-                'Assigned Team: ' . $team->team_name . "\n" .
-                'depends_on: ' . implode(', ', $request->dependencies ?? []) . "\n" .
-                'Please check your task list for more details.';
-            try {
-                $whatsappDetails = Whatsapp::where('user_id', Auth::user()->id)->first();
-                if (!$whatsappDetails) {
-                    return response()->json(['message' => 'WhatsApp configuration not found'], 404);
+        if ($request->filled('assigned_team')) {
+            $team = Team::find($request->assigned_team);
+            if ($team) {
+                $members = $team->members()->get();
+                foreach ($members as $member) {
+                    $to = (string) $member->phone;
+                    $message =
+                        'Hello, you have been assigned a new task:' . "\n" .
+                        'Title: ' . $request->title . "\n" .
+                        'Description: ' . $request->description . "\n" .
+                        'Due Date: ' . $request->due_date . "\n" .
+                        'Priority: ' . $request->priority . "\n" .
+                        'Status: ' . $request->status . "\n" .
+                        'Assigned Team: ' . $team->team_name . "\n" .
+                        'depends_on: ' . implode(', ', $request->dependencies ?? []) . "\n" .
+                        'Please check your task list for more details.';
+                    try {
+                        $whatsappDetails = Whatsapp::where('user_id', Auth::user()->id)->first();
+                        if (!$whatsappDetails) {
+                            return response()->json(['message' => 'WhatsApp configuration not found'], 404);
+                        }
+                        $whatsappService = new \\App\\Services\\WhatsAppService();
+                        $response = $whatsappService->sendMessage(
+                            $to,
+                            $message,
+                            $whatsappDetails->number,
+                            $whatsappDetails->token
+                        );
+                    } catch (\\Exception $e) {
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => $e->getMessage(),
+                        ], 500);
+                    }
                 }
-                $whatsappService = new \App\Services\WhatsAppService();
-                $response = $whatsappService->sendMessage($to, $message,
-                    $whatsappDetails->number,
-                    $whatsappDetails->token
-                );
-            } catch (\Exception $e) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $e->getMessage(),
-                ], 500);
             }
         }
 
